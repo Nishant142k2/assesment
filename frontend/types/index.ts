@@ -10,12 +10,13 @@ export type FieldType =
   | "file";
 
 export interface FormField {
-  id: string;
+  id?: string;         // only present locally while building; backend does not return it
+  name: string;        // snake_case unique identifier — used as the form value key
   type: FieldType;
   label: string;
   placeholder?: string;
   required: boolean;
-  options?: string[];
+  options?: string[] | null;
 }
 
 // ── API response shapes (what FastAPI sends back) ─────────────────────────────

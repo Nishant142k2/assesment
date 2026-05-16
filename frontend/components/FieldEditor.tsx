@@ -87,8 +87,8 @@ export default function FieldEditor({ field, index, onChange, onDelete, onMoveUp
         )}
 
         <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8 }}>
-          <input type="checkbox" id={`req-${field.id}`} checked={field.required} onChange={(e) => onChange({ ...field, required: e.target.checked })} />
-          <label htmlFor={`req-${field.id}`} style={{ fontSize: 13, color: "#374151", cursor: "pointer" }}>Required field</label>
+          <input type="checkbox" id={`req-${field.name || field.id}`} checked={field.required} onChange={(e) => onChange({ ...field, required: e.target.checked })} />
+          <label htmlFor={`req-${field.name || field.id}`} style={{ fontSize: 13, color: "#374151", cursor: "pointer" }}>Required field</label>
         </div>
       </div>
 

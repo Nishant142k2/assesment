@@ -61,7 +61,7 @@ export default function SubmissionsPage() {
                   <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
                     <th style={th}>#</th>
                     <th style={th}>Submitted</th>
-                    {form.fields.slice(0, 3).map((f) => <th key={f.id} style={th}>{f.label}</th>)}
+                    {form.fields.slice(0, 3).map((f) => <th key={f.name} style={th}>{f.label}</th>)}
                     <th style={th}>Actions</th>
                   </tr>
                 </thead>
@@ -71,8 +71,8 @@ export default function SubmissionsPage() {
                       <td style={td}>{i + 1}</td>
                       <td style={td}>{new Date(sub.submitted_at).toLocaleString()}</td>
                       {form.fields.slice(0, 3).map((f) => (
-                        <td key={f.id} style={{ ...td, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {Array.isArray(sub.data[f.id]) ? (sub.data[f.id] as string[]).join(", ") : String(sub.data[f.id] ?? "—")}
+                        <td key={f.name} style={{ ...td, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {Array.isArray(sub.data[f.name]) ? (sub.data[f.name] as string[]).join(", ") : String(sub.data[f.name] ?? "—")}
                         </td>
                       ))}
                       <td style={td}>
@@ -96,10 +96,10 @@ export default function SubmissionsPage() {
             </div>
             <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 16 }}>{new Date(selected.submitted_at).toLocaleString()}</p>
             {form.fields.map((f) => (
-              <div key={f.id} style={{ marginBottom: 12 }}>
+              <div key={f.name} style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3 }}>{f.label}</div>
                 <div style={{ fontSize: 13, color: "#111", background: "#f9fafb", padding: "6px 10px", borderRadius: 5, wordBreak: "break-word" }}>
-                  {Array.isArray(selected.data[f.id]) ? (selected.data[f.id] as string[]).join(", ") || "—" : String(selected.data[f.id] ?? "—")}
+                  {Array.isArray(selected.data[f.name]) ? (selected.data[f.name] as string[]).join(", ") || "—" : String(selected.data[f.name] ?? "—")}
                 </div>
               </div>
             ))}

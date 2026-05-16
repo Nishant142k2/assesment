@@ -14,24 +14,26 @@ export default function FormRenderer({ form, onSubmit }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const setValue = (id: string, value: unknown) => {
-    setValues((prev) => ({ ...prev, [id]: value }));
-    setErrors((prev) => ({ ...prev, [id]: "" }));
+  const setValue = (name: string, value: unknown) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const toggleCheckbox = (id: string, option: string) => {
-    const current = (values[id] as string[]) ?? [];
-    const updated = current.includes(option) ? current.filter((v) => v !== option) : [...current, option];
-    setValue(id, updated);
+  const toggleCheckbox = (name: string, option: string) => {
+    const current = (values[name] as string[]) ?? [];
+    const updated = current.includes(option)
+      ? current.filter((v) => v !== option)
+      : [...current, option];
+    setValue(name, updated);
   };
 
   const validate = () => {
     const errs: Record<string, string> = {};
     for (const field of form.fields) {
       if (field.required) {
-        const val = values[field.id];
+        const val = values[field.name];
         if (!val || (Array.isArray(val) && val.length === 0) || val === "") {
-          errs[field.id] = "This field is required.";
+          errs[field.name] = "This field is required.";
         }
       }
     }
@@ -59,7 +61,10 @@ export default function FormRenderer({ form, onSubmit }: Props) {
         <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
         <h2 style={{ fontSize: 20, fontWeight: 700 }}>Response Submitted!</h2>
         <p style={{ color: "#6b7280", marginTop: 8, marginBottom: 24 }}>Your response has been recorded.</p>
-        <button onClick={() => { setSubmitted(false); setValues({}); setErrors({}); setSubmitError(""); }} style={primaryBtn}>
+        <button
+          onClick={() => { setSubmitted(false); setValues({}); setErrors({}); setSubmitError(""); }}
+          style={primaryBtn}
+        >
           Submit another response
         </button>
       </div>
@@ -69,12 +74,14 @@ export default function FormRenderer({ form, onSubmit }: Props) {
   return (
     <div>
       {form.fields.map((field) => (
-        <div key={field.id} style={{ marginBottom: 20 }}>
+        <div key={field.name} style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 6, color: "#111" }}>
             {field.label} {field.required && <span style={{ color: "#ef4444" }}>*</span>}
           </label>
           {renderField(field, values, setValue, toggleCheckbox)}
-          {errors[field.id] && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 4 }}>{errors[field.id]}</p>}
+          {errors[field.name] && (
+            <p style={{ color: "#ef4444", fontSize: 12, marginTop: 4 }}>{errors[field.name]}</p>
+          )}
         </div>
       ))}
       {submitError && (
@@ -82,7 +89,11 @@ export default function FormRenderer({ form, onSubmit }: Props) {
           ⚠️ {submitError}
         </div>
       )}
-      <button onClick={handleSubmit} disabled={submitting} style={{ ...primaryBtn, opacity: submitting ? 0.6 : 1, marginTop: 8 }}>
+      <button
+        onClick={handleSubmit}
+        disabled={submitting}
+        style={{ ...primaryBtn, opacity: submitting ? 0.6 : 1, marginTop: 8 }}
+      >
         {submitting ? "Submitting..." : "Submit Response"}
       </button>
     </div>
@@ -92,27 +103,49 @@ export default function FormRenderer({ form, onSubmit }: Props) {
 function renderField(
   field: FormField,
   values: Record<string, unknown>,
-  setValue: (id: string, v: unknown) => void,
-  toggleCheckbox: (id: string, option: string) => void
+  setValue: (name: string, v: unknown) => void,
+  toggleCheckbox: (name: string, option: string) => void
 ) {
-  const base: React.CSSProperties = { width: "100%", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 14, boxSizing: "border-box", background: "#f9fafb" };
+  const base: React.CSSProperties = {
+    width: "100%", padding: "9px 12px", border: "1px solid #d1d5db",
+    borderRadius: 6, fontSize: 14, boxSizing: "border-box", background: "#f9fafb",
+  };
+  const options = field.options?.filter(Boolean) ?? [];
 
   switch (field.type) {
     case "textarea":
-      return <textarea rows={4} value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} placeholder={field.placeholder} style={{ ...base, resize: "vertical" }} />;
+      return (
+        <textarea
+          rows={4}
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          placeholder={field.placeholder}
+          style={{ ...base, resize: "vertical" }}
+        />
+      );
     case "select":
       return (
-        <select value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} style={base}>
+        <select
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          style={base}
+        >
           <option value="">— Select —</option>
-          {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+          {options.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
       );
     case "radio":
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {field.options?.map((o) => (
+          {options.map((o) => (
             <label key={o} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
-              <input type="radio" name={field.id} value={o} checked={values[field.id] === o} onChange={() => setValue(field.id, o)} />
+              <input
+                type="radio"
+                name={field.name}
+                value={o}
+                checked={values[field.name] === o}
+                onChange={() => setValue(field.name, o)}
+              />
               {o}
             </label>
           ))}
@@ -121,25 +154,69 @@ function renderField(
     case "checkbox":
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {field.options?.map((o) => (
+          {options.map((o) => (
             <label key={o} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
-              <input type="checkbox" checked={((values[field.id] as string[]) ?? []).includes(o)} onChange={() => toggleCheckbox(field.id, o)} />
+              <input
+                type="checkbox"
+                checked={((values[field.name] as string[]) ?? []).includes(o)}
+                onChange={() => toggleCheckbox(field.name, o)}
+              />
               {o}
             </label>
           ))}
         </div>
       );
     case "file":
-      return <input type="file" onChange={(e) => setValue(field.id, e.target.files?.[0]?.name ?? "")} style={{ fontSize: 14 }} />;
+      return (
+        <input
+          type="file"
+          onChange={(e) => setValue(field.name, e.target.files?.[0]?.name ?? "")}
+          style={{ fontSize: 14 }}
+        />
+      );
     case "date":
-      return <input type="date" value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} style={base} />;
+      return (
+        <input
+          type="date"
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          style={base}
+        />
+      );
     case "number":
-      return <input type="number" value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} placeholder={field.placeholder} style={base} />;
+      return (
+        <input
+          type="number"
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          placeholder={field.placeholder}
+          style={base}
+        />
+      );
     case "email":
-      return <input type="email" value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} placeholder={field.placeholder} style={base} />;
+      return (
+        <input
+          type="email"
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          placeholder={field.placeholder}
+          style={base}
+        />
+      );
     default:
-      return <input type="text" value={(values[field.id] as string) ?? ""} onChange={(e) => setValue(field.id, e.target.value)} placeholder={field.placeholder} style={base} />;
+      return (
+        <input
+          type="text"
+          value={(values[field.name] as string) ?? ""}
+          onChange={(e) => setValue(field.name, e.target.value)}
+          placeholder={field.placeholder}
+          style={base}
+        />
+      );
   }
 }
 
-const primaryBtn: React.CSSProperties = { background: "#2563eb", color: "#fff", border: "none", borderRadius: 7, padding: "10px 24px", fontWeight: 600, fontSize: 14, cursor: "pointer" };
+const primaryBtn: React.CSSProperties = {
+  background: "#2563eb", color: "#fff", border: "none",
+  borderRadius: 7, padding: "10px 24px", fontWeight: 600, fontSize: 14, cursor: "pointer",
+};
